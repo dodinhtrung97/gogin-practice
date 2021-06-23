@@ -36,23 +36,23 @@ type database struct {
 }
 
 func NewAnimalRepository() AnimalRepository {
-	var db_config databaseConfig
-	load_config_err := gonfig.GetConf(getDbConfigFilePath(), &db_config)
+	var dbConfig databaseConfig
+	loadConfigErr := gonfig.GetConf(getDbConfigFilePath(), &dbConfig)
 
-	if load_config_err != nil {
-		panic(load_config_err.Error())
+	if loadConfigErr != nil {
+		panic(loadConfigErr.Error())
 	}
 
-	mysql_endpoint := fmt.Sprintf(
+	mysqlEndpoint := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		db_config.User,
-		db_config.Password,
-		db_config.Host,
-		db_config.Port,
-		db_config.Database)
-	db, err := gorm.Open(mysql.Open(mysql_endpoint), &gorm.Config{})
-	if err != nil {
-		panic("Failed to connect to db @ " + mysql_endpoint + " with error: " + err.Error())
+		dbConfig.User,
+		dbConfig.Password,
+		dbConfig.Host,
+		dbConfig.Port,
+		dbConfig.Database)
+	db, connectionErr := gorm.Open(mysql.Open(mysqlEndpoint), &gorm.Config{})
+	if connectionErr != nil {
+		panic("Failed to connect to db @ " + mysqlEndpoint + " with error: " + connectionErr.Error())
 	}
 
 	db.AutoMigrate(&entity.Animal{})
