@@ -16,10 +16,10 @@ import (
 
 type AnimalRepository interface {
 	Close()
-	Save(animal entity.Animal) entity.Animal
-	Update(animal entity.Animal) entity.Animal
-	Delete(animal entity.Animal) entity.Animal
-	FindById(id uint64) entity.Animal
+	Save(animal entity.Animal) (entity.Animal, error)
+	Update(animal entity.Animal) (entity.Animal, error)
+	Delete(animal entity.Animal) (entity.Animal, error)
+	FindById(id uint64) (entity.Animal, error)
 	FindAll() []entity.Animal
 }
 
@@ -64,26 +64,34 @@ func (db *database) Close() {
 	sqlDB.Close()
 }
 
-func (db *database) Save(animal entity.Animal) entity.Animal {
-	db.connection.Save(&animal)
-	return animal
+func (db *database) Save(animal entity.Animal) (entity.Animal, error) {
+	if err := db.connection.Save(&animal).Error; err != nil {
+		return entity.Animal{}, err
+	}
+	return animal, nil
 }
 
-func (db *database) Update(animal entity.Animal) entity.Animal {
-	db.connection.Save(&animal)
-	return animal
+func (db *database) Update(animal entity.Animal) (entity.Animal, error) {
+	if err := db.connection.Save(&animal).Error; err != nil {
+		return entity.Animal{}, err
+	}
+	return animal, nil
 }
 
-func (db *database) Delete(animal entity.Animal) entity.Animal {
-	db.connection.Delete(&animal)
-	return animal
+func (db *database) Delete(animal entity.Animal) (entity.Animal, error) {
+	if err := db.connection.Delete(&animal).Error; err != nil {
+		return entity.Animal{}, err
+	}
+	return animal, nil
 }
 
-func (db *database) FindById(id uint64) entity.Animal {
+func (db *database) FindById(id uint64) (entity.Animal, error) {
 	var animal entity.Animal
-	db.connection.First(&animal, id)
+	if err := db.connection.First(&animal, id).Error; err != nil {
+		return entity.Animal{}, err
+	}
 
-	return animal
+	return animal, nil
 }
 
 func (db *database) FindAll() []entity.Animal {

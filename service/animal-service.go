@@ -6,10 +6,10 @@ import (
 )
 
 type AnimalService interface {
-	Save(entity.Animal) entity.Animal
-	Update(entity.Animal) entity.Animal
-	Delete(entity.Animal) entity.Animal
-	FindById(id uint64) entity.Animal
+	Save(entity.Animal) (entity.Animal, error)
+	Update(entity.Animal) (entity.Animal, error)
+	Delete(entity.Animal) (entity.Animal, error)
+	FindById(id uint64) (entity.Animal, error)
 	FindAll() []entity.Animal
 }
 
@@ -23,19 +23,19 @@ func NewAnimalService(animalRepository repository.AnimalRepository) AnimalServic
 	}
 }
 
-func (service *animalService) Save(animal entity.Animal) entity.Animal {
+func (service *animalService) Save(animal entity.Animal) (entity.Animal, error) {
 	return service.animalRepository.Save(animal)
 }
 
-func (service *animalService) Update(animal entity.Animal) entity.Animal {
+func (service *animalService) Update(animal entity.Animal) (entity.Animal, error) {
 	return service.animalRepository.Update(animal)
 }
 
-func (service *animalService) Delete(animal entity.Animal) entity.Animal {
+func (service *animalService) Delete(animal entity.Animal) (entity.Animal, error) {
 	return service.animalRepository.Delete(animal)
 }
 
-func (service *animalService) FindById(id uint64) entity.Animal {
+func (service *animalService) FindById(id uint64) (entity.Animal, error) {
 	return service.animalRepository.FindById(id)
 }
 

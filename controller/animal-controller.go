@@ -2,6 +2,7 @@ package controller
 
 import (
 	"gogin-practice/entity"
+	"gogin-practice/error"
 	"gogin-practice/service"
 	"strconv"
 
@@ -28,36 +29,56 @@ func NewAnimalController(service service.AnimalService) AnimalController {
 
 func (controller *animalController) Save(ctx *gin.Context) {
 	var animal entity.Animal
-	err := ctx.BindJSON(&animal)
 
-	if err != nil {
+	if err := ctx.BindJSON(&animal); err != nil {
 		ctx.JSON(400, "Failed to bind request body to Animal")
 		return
 	}
 
-	ctx.JSON(201, controller.service.Save(animal))
+	result, err := controller.service.Save(animal)
+	if err != nil {
+		httpErr := error.NewBadRequestError("Failed to save new animal")
+		ctx.JSON(httpErr.Status, httpErr)
+		return
+	}
+
+	ctx.JSON(201, result)
 }
 
 func (controller *animalController) Update(ctx *gin.Context) {
 	var animal entity.Animal
-	err := ctx.BindJSON(&animal)
 
-	if err != nil {
+	if err := ctx.BindJSON(&animal); err != nil {
 		ctx.JSON(400, "Failed to bind request body to Animal")
 		return
 	}
-	ctx.JSON(200, controller.service.Update(animal))
+
+	result, err := controller.service.Update(animal)
+
+	if err != nil {
+		httpErr := error.NewNotFoundError("No existing entry to update")
+		ctx.JSON(httpErr.Status, httpErr)
+		return
+	}
+	ctx.JSON(200, result)
 }
 
 func (controller *animalController) Delete(ctx *gin.Context) {
 	var animal entity.Animal
-	err := ctx.BindJSON(&animal)
 
-	if err != nil {
+	if err := ctx.BindJSON(&animal); err != nil {
 		ctx.JSON(400, "Failed to bind request body to Animal")
 		return
 	}
-	ctx.JSON(200, controller.service.Delete(animal))
+
+	result, err := controller.service.Delete(animal)
+
+	if err != nil {
+		httpErr := error.NewNotFoundError("No entry to delete")
+		ctx.JSON(httpErr.Status, httpErr)
+		return
+	}
+	ctx.JSON(200, result)
 }
 
 func (controller *animalController) FindById(ctx *gin.Context) {
@@ -67,7 +88,14 @@ func (controller *animalController) FindById(ctx *gin.Context) {
 		ctx.JSON(400, "Failed to parse input to id type")
 		return
 	}
-	ctx.JSON(200, controller.service.FindById(id))
+
+	animal, err := controller.service.FindById(id)
+	if err != nil {
+		httpErr := error.NewNotFoundError("Can't find entry with id " + strconv.FormatUint(id, 10))
+		ctx.JSON(httpErr.Status, httpErr)
+		return
+	}
+	ctx.JSON(200, animal)
 }
 
 func (controller *animalController) FindAll(ctx *gin.Context) {
