@@ -36,13 +36,7 @@ type database struct {
 }
 
 func NewAnimalRepository() AnimalRepository {
-	var dbConfig databaseConfig
-	loadConfigErr := gonfig.GetConf(getDbConfigFilePath(), &dbConfig)
-
-	if loadConfigErr != nil {
-		panic(loadConfigErr.Error())
-	}
-
+	dbConfig := getDbConfig()
 	mysqlEndpoint := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		dbConfig.User,
@@ -50,6 +44,7 @@ func NewAnimalRepository() AnimalRepository {
 		dbConfig.Host,
 		dbConfig.Port,
 		dbConfig.Database)
+
 	db, connectionErr := gorm.Open(mysql.Open(mysqlEndpoint), &gorm.Config{})
 	if connectionErr != nil {
 		panic("Failed to connect to db @ " + mysqlEndpoint + " with error: " + connectionErr.Error())
@@ -96,6 +91,15 @@ func (db *database) FindAll() []entity.Animal {
 	db.connection.Find(&animals)
 
 	return animals
+}
+
+func getDbConfig() databaseConfig {
+	var dbConfig databaseConfig
+	if loadConfigErr := gonfig.GetConf(getDbConfigFilePath(), &dbConfig); loadConfigErr != nil {
+		panic(loadConfigErr.Error())
+	}
+
+	return dbConfig
 }
 
 func getDbConfigFilePath() string {

@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"errors"
-	"fmt"
 	"gogin-practice/entity"
 	"gogin-practice/service"
 	"strconv"
@@ -11,11 +9,11 @@ import (
 )
 
 type AnimalController interface {
-	Save(ctx *gin.Context) entity.Animal
-	Update(ctx *gin.Context) entity.Animal
-	Delete(ctx *gin.Context) entity.Animal
-	FindById(ctx *gin.Context) (entity.Animal, error)
-	FindAll() []entity.Animal
+	Save(ctx *gin.Context)
+	Update(ctx *gin.Context)
+	Delete(ctx *gin.Context)
+	FindById(ctx *gin.Context)
+	FindAll(ctx *gin.Context)
 }
 
 type animalController struct {
@@ -28,48 +26,50 @@ func NewAnimalController(service service.AnimalService) AnimalController {
 	}
 }
 
-func (controller *animalController) Save(ctx *gin.Context) entity.Animal {
+func (controller *animalController) Save(ctx *gin.Context) {
 	var animal entity.Animal
 	err := ctx.BindJSON(&animal)
 
 	if err != nil {
-		fmt.Println("Can't bind request body to Animal")
-		return entity.Animal{}
+		ctx.JSON(400, "Failed to bind request body to Animal")
+		return
 	}
-	return controller.service.Save(animal)
+
+	ctx.JSON(201, controller.service.Save(animal))
 }
 
-func (controller *animalController) Update(ctx *gin.Context) entity.Animal {
+func (controller *animalController) Update(ctx *gin.Context) {
 	var animal entity.Animal
 	err := ctx.BindJSON(&animal)
 
 	if err != nil {
-		fmt.Println("Can't bind request body to Animal")
-		return entity.Animal{}
+		ctx.JSON(400, "Failed to bind request body to Animal")
+		return
 	}
-	return controller.service.Update(animal)
+	ctx.JSON(200, controller.service.Update(animal))
 }
 
-func (controller *animalController) Delete(ctx *gin.Context) entity.Animal {
+func (controller *animalController) Delete(ctx *gin.Context) {
 	var animal entity.Animal
 	err := ctx.BindJSON(&animal)
 
 	if err != nil {
-		fmt.Println("Can't bind request body to Animal")
-		return entity.Animal{}
+		ctx.JSON(400, "Failed to bind request body to Animal")
+		return
 	}
-	return controller.service.Delete(animal)
+	ctx.JSON(200, controller.service.Delete(animal))
 }
 
-func (controller *animalController) FindById(ctx *gin.Context) (entity.Animal, error) {
+func (controller *animalController) FindById(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 
 	if err != nil {
-		return entity.Animal{}, errors.New("Failed to parse input to id type")
+		ctx.JSON(400, "Failed to parse input to id type")
+		return
 	}
-	return controller.service.FindById(id), nil
+	ctx.JSON(200, controller.service.FindById(id))
 }
 
-func (controller *animalController) FindAll() []entity.Animal {
-	return controller.service.FindAll()
+func (controller *animalController) FindAll(ctx *gin.Context) {
+	ctx.JSON(200, controller.service.FindAll())
 }
