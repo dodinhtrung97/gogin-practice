@@ -1,13 +1,21 @@
 package repository
 
 import (
+	"fmt"
 	"gogin-practice/entity"
+	"path"
+	"runtime"
+	"strings"
 
+	"path/filepath"
+
+	"github.com/tkanos/gonfig"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 type AnimalRepository interface {
+	Close()
 	Save(animal entity.Animal) entity.Animal
 	Update(animal entity.Animal) entity.Animal
 	Delete(animal entity.Animal) entity.Animal
@@ -15,16 +23,36 @@ type AnimalRepository interface {
 	FindAll() []entity.Animal
 }
 
+type databaseConfig struct {
+	Host     string
+	Port     string
+	User     string
+	Password string
+	Database string
+}
+
 type database struct {
 	connection *gorm.DB
 }
 
 func NewAnimalRepository() AnimalRepository {
-	mysql_endpoint := "root:root@tcp(127.0.0.1:3306)/gogin_practice?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(mysql_endpoint), &gorm.Config{})
+	var db_config databaseConfig
+	load_config_err := gonfig.GetConf(getDbConfigFilePath(), &db_config)
 
+	if load_config_err != nil {
+		panic(load_config_err.Error())
+	}
+
+	mysql_endpoint := fmt.Sprintf(
+		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		db_config.User,
+		db_config.Password,
+		db_config.Host,
+		db_config.Port,
+		db_config.Database)
+	db, err := gorm.Open(mysql.Open(mysql_endpoint), &gorm.Config{})
 	if err != nil {
-		panic("Failed to connect to db @ " + mysql_endpoint)
+		panic("Failed to connect to db @ " + mysql_endpoint + " with error: " + err.Error())
 	}
 
 	db.AutoMigrate(&entity.Animal{})
@@ -68,4 +96,12 @@ func (db *database) FindAll() []entity.Animal {
 	db.connection.Find(&animals)
 
 	return animals
+}
+
+func getDbConfigFilePath() string {
+	filename := []string{"config/", "db_config", ".json"}
+	_, dirname, _, _ := runtime.Caller(0)
+	filePath := path.Join(filepath.Dir(dirname), "..", strings.Join(filename, ""))
+
+	return filepath.FromSlash(filePath)
 }

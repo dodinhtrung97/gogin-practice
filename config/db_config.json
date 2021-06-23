@@ -1,0 +1,7 @@
+{
+    "Host": "localhost",
+    "Port": "3306",
+    "User": "root",
+    "Password": "root",
+    "Database": "gogin_practice"
+}

@@ -17,6 +17,8 @@ var (
 func main() {
 	v1 := gin.Default()
 
+	defer animalRepository.Close()
+
 	v1.POST("/post", func(ctx *gin.Context) {
 		ctx.JSON(200, animalController.Save(ctx))
 	})
