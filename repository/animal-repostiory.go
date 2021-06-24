@@ -50,7 +50,7 @@ func NewAnimalRepository() AnimalRepository {
 		panic("Failed to connect to db @ " + mysqlEndpoint + " with error: " + connectionErr.Error())
 	}
 
-	db.AutoMigrate(&entity.Animal{})
+	db.AutoMigrate(&entity.Animal{}, &entity.Household{})
 	return &database{
 		connection: db,
 	}
@@ -79,6 +79,9 @@ func (db *database) Update(animal entity.Animal) (entity.Animal, error) {
 }
 
 func (db *database) Delete(animal entity.Animal) (entity.Animal, error) {
+	if err := db.connection.Delete(&animal.Household).Error; err != nil {
+		return entity.Animal{}, err
+	}
 	if err := db.connection.Delete(&animal).Error; err != nil {
 		return entity.Animal{}, err
 	}
@@ -87,7 +90,7 @@ func (db *database) Delete(animal entity.Animal) (entity.Animal, error) {
 
 func (db *database) FindById(id uint64) (entity.Animal, error) {
 	var animal entity.Animal
-	if err := db.connection.First(&animal, id).Error; err != nil {
+	if err := db.connection.Preload("Household").First(&animal, id).Error; err != nil {
 		return entity.Animal{}, err
 	}
 
@@ -96,7 +99,7 @@ func (db *database) FindById(id uint64) (entity.Animal, error) {
 
 func (db *database) FindAll() []entity.Animal {
 	var animals []entity.Animal
-	db.connection.Find(&animals)
+	db.connection.Preload("Household").Find(&animals)
 
 	return animals
 }
