@@ -28,10 +28,16 @@ func (service *animalService) Save(animal entity.Animal) (entity.Animal, error) 
 }
 
 func (service *animalService) Update(animal entity.Animal) (entity.Animal, error) {
+	if _, err := service.FindById(animal.ID); err != nil {
+		return entity.Animal{}, err
+	}
 	return service.animalRepository.Update(animal)
 }
 
 func (service *animalService) Delete(animal entity.Animal) (entity.Animal, error) {
+	if _, err := service.FindById(animal.ID); err != nil {
+		return entity.Animal{}, err
+	}
 	return service.animalRepository.Delete(animal)
 }
 
