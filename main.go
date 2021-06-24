@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gogin-practice/config"
 	"gogin-practice/controller"
 	"gogin-practice/repository"
 	"gogin-practice/service"
@@ -9,7 +10,8 @@ import (
 )
 
 var (
-	animalRepository repository.AnimalRepository = repository.NewAnimalRepository()
+	mysqlConnection  *config.Database            = config.NewMySqlConnection()
+	animalRepository repository.AnimalRepository = repository.NewAnimalRepository(mysqlConnection)
 	animalService    service.AnimalService       = service.NewAnimalService(animalRepository)
 	animalController controller.AnimalController = controller.NewAnimalController(animalService)
 )
@@ -17,7 +19,7 @@ var (
 func main() {
 	v1 := gin.Default()
 
-	defer animalRepository.Close()
+	defer mysqlConnection.Close()
 
 	v1.POST("/post", animalController.Save)
 	v1.PUT("/put", animalController.Update)
