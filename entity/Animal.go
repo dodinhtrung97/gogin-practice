@@ -5,5 +5,5 @@ type Animal struct {
 	Name      string    `json:"name" gorm:"type:varchar(100)"`
 	IsFeline  bool      `json:"isFeline" gorm:"type:tinyint"`
 	Breed     string    `json:"breed" gorm:"type:varchar(100)"`
-	Household Household `json:"household"`
+	Household Household `json:"household" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

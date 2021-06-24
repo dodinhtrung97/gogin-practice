@@ -14,6 +14,7 @@ Database connection and ORM are handled by `GORM`
 * Practice GoLang HTTP error handling
 * Practice GoLang struct tag and GORM's entity tag
 * One-to-one relationship
+* Cascading
 * Packaging
 
 ## Environment
